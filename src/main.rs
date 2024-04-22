@@ -2,6 +2,17 @@ mod handler;
 
 use clap::{Parser, Subcommand};
 
+/// This CLI tool allows you to encrypt and decrypt data using a password and key name.
+///
+/// To encrypt data:
+/// ```
+/// aeadify -- -p my_password -k my_key encrypt "sensitive data"
+/// ```
+///
+/// To decrypt data:
+/// ```
+/// aeadify -- -p my_password -k my_key decrypt
+/// ```
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
 struct CliCommands {
@@ -19,17 +30,12 @@ struct CliCommands {
 #[derive(Subcommand, Debug, Clone)]
 enum Action {
     /// Encrypt data using a password and specify a key name
-    #[clap(short_flag = 'e', long_flag = "encrypt")]
     Encrypt {
         /// Specify the data to be encrypted
         input_data: String,
     },
     /// Decrypt data using a key name and password
-    #[clap(short_flag = 'd', long_flag = "decrypt")]
-    Decrypt {
-        /// Specify the key name associated with the encrypted data
-        key: String,
-    },
+    Decrypt,
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -39,8 +45,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         Action::Encrypt { input_data } => {
             handler::store_keys(&args.key, &input_data, &args.password)?;
         }
-        Action::Decrypt { key } => {
-            let encrypted_string = handler::get_keys(&key, &args.password)?;
+        Action::Decrypt => {
+            let encrypted_string = handler::get_keys(&args.key, &args.password)?;
             println!("Decrypted data: {}", encrypted_string);
         }
     }
